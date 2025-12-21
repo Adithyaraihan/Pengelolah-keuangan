@@ -1,0 +1,23 @@
+import jwt from "jsonwebtoken";
+
+export const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({
+      message: "Unauthorized: Access Token tidak ditemukan",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    req.user = payload;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Token tidak valid atau telah kedaluwarsa",
+    });
+  }
+};
